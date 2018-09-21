@@ -1,12 +1,16 @@
 {
-  "name": "videojs-vr",
+  "name": "@AndrewStobie/videojs-vr",
   "version": "1.5.0",
-  "description": "A plugin to add 360 and VR video support to video.js.",
+  "description": "A plugin to add 360 and VR video support to video.js. with custom to support different cube options",
   "author": {
-    "name": "James Broberg",
-    "email": "james.broberg@metacdn.com"
+    "name": "Andrew Stobie",
+    "email": "agstobie@gmail.com"
   },
   "contributors": [
+    {
+      "name": "James Broberg",
+      "email": "james.broberg@metacdn.com"
+    },
     {
       "name": "Sean Lawrence",
       "email": "lawrensm@gmail.com"

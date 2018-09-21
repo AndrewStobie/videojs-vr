@@ -1,4 +1,4 @@
-import {version as VERSION} from '../package.json';
+import { version as VERSION } from '../package.json';
 import window from 'global/window';
 import document from 'global/document';
 import WebVRPolyfill from 'webvr-polyfill';
@@ -25,7 +25,8 @@ const errors = {
   'web-vr-out-of-date': {
     headline: '360 is out of date',
     type: '360_OUT_OF_DATE',
-    message: "Your browser supports 360 but not the latest version. See <a href='http://webvr.info'>http://webvr.info</a> for more info."
+    message:
+      "Your browser supports 360 but not the latest version. See <a href='http://webvr.info'>http://webvr.info</a> for more info."
   },
   'web-vr-not-supported': {
     headline: '360 not supported on this device',
@@ -35,7 +36,8 @@ const errors = {
   'web-vr-hls-cors-not-supported': {
     headline: '360 HLS video not supported on this device',
     type: '360_NOT_SUPPORTED',
-    message: "Your browser/device does not support HLS 360 video. See <a href='http://webvr.info'>http://webvr.info</a> for assistance."
+    message:
+      "Your browser/device does not support HLS 360 video. See <a href='http://webvr.info'>http://webvr.info</a> for assistance."
   }
 };
 
@@ -56,7 +58,7 @@ class VR extends Plugin {
     this.videojsErrorsSupport_ = !!videojs.errors;
 
     if (this.videojsErrorsSupport_) {
-      player.errors({errors});
+      player.errors({ errors });
     }
 
     // IE 11 does not support enough webgl to be supported
@@ -65,7 +67,7 @@ class VR extends Plugin {
       // if a player triggers error before 'loadstart' is fired
       // video.js will reset the error overlay
       this.player_.on('loadstart', () => {
-        this.triggerError_({code: 'web-vr-not-supported', dismiss: false});
+        this.triggerError_({ code: 'web-vr-not-supported', dismiss: false });
       });
       return;
     }
@@ -85,18 +87,24 @@ class VR extends Plugin {
 
     // any time the video element is recycled for ads
     // we have to reset the vr state and re-init after ad
-    this.on(player, 'adstart', () => player.setTimeout(() => {
-      // if the video element was recycled for this ad
-      if (!player.ads || !player.ads.videoElementRecycled()) {
-        this.log('video element not recycled for this ad, no need to reset');
-        return;
-      }
+    this.on(
+      player,
+      'adstart',
+      () =>
+        player.setTimeout(() => {
+          // if the video element was recycled for this ad
+          if (!player.ads || !player.ads.videoElementRecycled()) {
+            this.log('video element not recycled for this ad, no need to reset');
+            return;
+          }
 
-      this.log('video element recycled for this ad, reseting');
-      this.reset();
+          this.log('video element recycled for this ad, reseting');
+          this.reset();
 
-      this.one(player, 'playing', this.init);
-    }), 1);
+          this.one(player, 'playing', this.init);
+        }),
+      1
+    );
 
     this.on(player, 'loadedmetadata', this.init);
   }
@@ -108,7 +116,7 @@ class VR extends Plugin {
       projection = 'NONE';
     }
 
-    const position = {x: 0, y: 0, z: 0 };
+    const position = { x: 0, y: 0, z: 0 };
 
     if (this.scene) {
       this.scene.remove(this.movieScreen);
@@ -123,36 +131,43 @@ class VR extends Plugin {
       }
       return this.changeProjection_('NONE');
     } else if (projection === '360') {
-
       this.movieGeometry = new THREE.SphereBufferGeometry(256, 32, 32);
-      this.movieMaterial = new THREE.MeshBasicMaterial({ map: this.videoTexture, overdraw: true, side: THREE.BackSide });
+      this.movieMaterial = new THREE.MeshBasicMaterial({
+        map: this.videoTexture,
+        overdraw: true,
+        side: THREE.BackSide
+      });
 
       this.movieScreen = new THREE.Mesh(this.movieGeometry, this.movieMaterial);
       this.movieScreen.position.set(position.x, position.y, position.z);
 
       this.movieScreen.scale.x = -1;
-      this.movieScreen.quaternion.setFromAxisAngle({x: 0, y: 1, z: 0}, -Math.PI / 2);
+      this.movieScreen.quaternion.setFromAxisAngle({ x: 0, y: 1, z: 0 }, -Math.PI / 2);
       this.scene.add(this.movieScreen);
     } else if (projection === '360_LR' || projection === '360_TB') {
       let geometry = new THREE.SphereGeometry(256, 32, 32);
 
       // Left eye view
-      let uvs = geometry.faceVertexUvs[ 0 ];
+      let uvs = geometry.faceVertexUvs[0];
 
       for (let i = 0; i < uvs.length; i++) {
         for (let j = 0; j < 3; j++) {
           if (projection === '360_LR') {
-            uvs[ i ][ j ].x *= 0.5;
+            uvs[i][j].x *= 0.5;
           } else {
-            uvs[ i ][ j ].y *= 0.5;
-            uvs[ i ][ j ].y += 0.5;
+            uvs[i][j].y *= 0.5;
+            uvs[i][j].y += 0.5;
           }
         }
       }
       geometry.scale(-1, 1, 1);
 
       this.movieGeometry = new THREE.BufferGeometry().fromGeometry(geometry);
-      this.movieMaterial = new THREE.MeshBasicMaterial({ map: this.videoTexture, overdraw: true, side: THREE.BackSide });
+      this.movieMaterial = new THREE.MeshBasicMaterial({
+        map: this.videoTexture,
+        overdraw: true,
+        side: THREE.BackSide
+      });
 
       this.movieScreen = new THREE.Mesh(this.movieGeometry, this.movieMaterial);
       this.movieScreen.rotation.y = -Math.PI / 2;
@@ -163,59 +178,103 @@ class VR extends Plugin {
       // Right eye view
       geometry = new THREE.SphereGeometry(256, 32, 32);
 
-      uvs = geometry.faceVertexUvs[ 0 ];
+      uvs = geometry.faceVertexUvs[0];
 
       for (let i = 0; i < uvs.length; i++) {
         for (let j = 0; j < 3; j++) {
           if (projection === '360_LR') {
-            uvs[ i ][ j ].x *= 0.5;
-            uvs[ i ][ j ].x += 0.5;
+            uvs[i][j].x *= 0.5;
+            uvs[i][j].x += 0.5;
           } else {
-            uvs[ i ][ j ].y *= 0.5;
+            uvs[i][j].y *= 0.5;
           }
         }
       }
       geometry.scale(-1, 1, 1);
 
       this.movieGeometry = new THREE.BufferGeometry().fromGeometry(geometry);
-      this.movieMaterial = new THREE.MeshBasicMaterial({ map: this.videoTexture, overdraw: true, side: THREE.BackSide });
+      this.movieMaterial = new THREE.MeshBasicMaterial({
+        map: this.videoTexture,
+        overdraw: true,
+        side: THREE.BackSide
+      });
 
       this.movieScreen = new THREE.Mesh(this.movieGeometry, this.movieMaterial);
       this.movieScreen.rotation.y = -Math.PI / 2;
       // display in right eye only
       this.movieScreen.layers.set(2);
       this.scene.add(this.movieScreen);
-
     } else if (projection === '360_CUBE') {
       this.movieGeometry = new THREE.BoxGeometry(256, 256, 256);
-      this.movieMaterial = new THREE.MeshBasicMaterial({ map: this.videoTexture, overdraw: true, side: THREE.BackSide });
+      this.movieMaterial = new THREE.MeshBasicMaterial({
+        map: this.videoTexture,
+        overdraw: true,
+        side: THREE.BackSide
+      });
 
-      const left = [new THREE.Vector2(0, 0.5), new THREE.Vector2(0.333, 0.5), new THREE.Vector2(0.333, 1), new THREE.Vector2(0, 1)];
-      const right = [new THREE.Vector2(0.333, 0.5), new THREE.Vector2(0.666, 0.5), new THREE.Vector2(0.666, 1), new THREE.Vector2(0.333, 1)];
-      const top = [new THREE.Vector2(0.666, 0.5), new THREE.Vector2(1, 0.5), new THREE.Vector2(1, 1), new THREE.Vector2(0.666, 1)];
-      const bottom = [new THREE.Vector2(0, 0), new THREE.Vector2(0.333, 0), new THREE.Vector2(0.333, 0.5), new THREE.Vector2(0, 0.5)];
-      const front = [new THREE.Vector2(0.333, 0), new THREE.Vector2(0.666, 0), new THREE.Vector2(0.666, 0.5), new THREE.Vector2(0.333, 0.5)];
-      const back = [new THREE.Vector2(0.666, 0), new THREE.Vector2(1, 0), new THREE.Vector2(1, 0.5), new THREE.Vector2(0.666, 0.5)];
+      // const left = [new THREE.Vector2(0, 0.5), new THREE.Vector2(0.333, 0.5), new THREE.Vector2(0.333, 1), new THREE.Vector2(0, 1)];
+      // const right = [new THREE.Vector2(0.333, 0.5), new THREE.Vector2(0.666, 0.5), new THREE.Vector2(0.666, 1), new THREE.Vector2(0.333, 1)];
+      // const top = [new THREE.Vector2(0.666, 0.5), new THREE.Vector2(1, 0.5), new THREE.Vector2(1, 1), new THREE.Vector2(0.666, 1)];
+      // const bottom = [new THREE.Vector2(0, 0), new THREE.Vector2(0.333, 0), new THREE.Vector2(0.333, 0.5), new THREE.Vector2(0, 0.5)];
+      // const front = [new THREE.Vector2(0.333, 0), new THREE.Vector2(0.666, 0), new THREE.Vector2(0.666, 0.5), new THREE.Vector2(0.333, 0.5)];
+      // const back = [new THREE.Vector2(0.666, 0), new THREE.Vector2(1, 0), new THREE.Vector2(1, 0.5), new THREE.Vector2(0.666, 0.5)];
+
+      const left = [
+        new THREE.Vector2(0, 0.5),
+        new THREE.Vector2(0.333, 0.5),
+        new THREE.Vector2(0.333, 1),
+        new THREE.Vector2(0, 1)
+      ];
+      const front = [
+        new THREE.Vector2(0.333, 0.5),
+        new THREE.Vector2(0.666, 0.5),
+        new THREE.Vector2(0.666, 1),
+        new THREE.Vector2(0.333, 1)
+      ];
+      const right = [
+        new THREE.Vector2(0.666, 0.5),
+        new THREE.Vector2(1, 0.5),
+        new THREE.Vector2(1, 1),
+        new THREE.Vector2(0.666, 1)
+      ];
+      const bottom = [
+        new THREE.Vector2(0, 0),
+        new THREE.Vector2(0.333, 0),
+        new THREE.Vector2(0.333, 0.5),
+        new THREE.Vector2(0, 0.5)
+      ];
+      const back = [
+        new THREE.Vector2(0.333, 0),
+        new THREE.Vector2(0.666, 0),
+        new THREE.Vector2(0.666, 0.5),
+        new THREE.Vector2(0.333, 0.5)
+      ];
+      const top = [
+        new THREE.Vector2(0.666, 0),
+        new THREE.Vector2(1, 0),
+        new THREE.Vector2(1, 0.5),
+        new THREE.Vector2(0.666, 0.5)
+      ];
 
       this.movieGeometry.faceVertexUvs[0] = [];
 
-      this.movieGeometry.faceVertexUvs[0][0] = [ right[2], right[1], right[3] ];
-      this.movieGeometry.faceVertexUvs[0][1] = [ right[1], right[0], right[3] ];
+      this.movieGeometry.faceVertexUvs[0][0] = [right[2], right[1], right[3]];
+      this.movieGeometry.faceVertexUvs[0][1] = [right[1], right[0], right[3]];
 
-      this.movieGeometry.faceVertexUvs[0][2] = [ left[2], left[1], left[3] ];
-      this.movieGeometry.faceVertexUvs[0][3] = [ left[1], left[0], left[3] ];
+      this.movieGeometry.faceVertexUvs[0][2] = [left[2], left[1], left[3]];
+      this.movieGeometry.faceVertexUvs[0][3] = [left[1], left[0], left[3]];
 
-      this.movieGeometry.faceVertexUvs[0][4] = [ top[2], top[1], top[3] ];
-      this.movieGeometry.faceVertexUvs[0][5] = [ top[1], top[0], top[3] ];
+      this.movieGeometry.faceVertexUvs[0][4] = [top[2], top[1], top[3]];
+      this.movieGeometry.faceVertexUvs[0][5] = [top[1], top[0], top[3]];
 
-      this.movieGeometry.faceVertexUvs[0][6] = [ bottom[2], bottom[1], bottom[3] ];
-      this.movieGeometry.faceVertexUvs[0][7] = [ bottom[1], bottom[0], bottom[3] ];
+      this.movieGeometry.faceVertexUvs[0][6] = [bottom[2], bottom[1], bottom[3]];
+      this.movieGeometry.faceVertexUvs[0][7] = [bottom[1], bottom[0], bottom[3]];
 
-      this.movieGeometry.faceVertexUvs[0][8] = [ front[2], front[1], front[3] ];
-      this.movieGeometry.faceVertexUvs[0][9] = [ front[1], front[0], front[3] ];
+      this.movieGeometry.faceVertexUvs[0][8] = [front[2], front[1], front[3]];
+      this.movieGeometry.faceVertexUvs[0][9] = [front[1], front[0], front[3]];
 
-      this.movieGeometry.faceVertexUvs[0][10] = [ back[2], back[1], back[3] ];
-      this.movieGeometry.faceVertexUvs[0][11] = [ back[1], back[0], back[3] ];
+      this.movieGeometry.faceVertexUvs[0][10] = [back[2], back[1], back[3]];
+      this.movieGeometry.faceVertexUvs[0][11] = [back[1], back[0], back[3]];
 
       this.movieScreen = new THREE.Mesh(this.movieGeometry, this.movieMaterial);
       this.movieScreen.position.set(position.x, position.y, position.z);
@@ -225,14 +284,13 @@ class VR extends Plugin {
     }
 
     this.currentProjection_ = projection;
-
   }
 
   triggerError_(errorObj) {
     // if we have videojs-errors use it
     if (this.videojsErrorsSupport_) {
       this.player_.error(errorObj);
-    // if we don't have videojs-errors just use a normal player error
+      // if we don't have videojs-errors just use a normal player error
     } else {
       // strip any html content from the error message
       // as it is not supported outside of videojs-errors
@@ -263,7 +321,7 @@ class VR extends Plugin {
     if (!this.vrDisplay) {
       return;
     }
-    this.vrDisplay.requestPresent([{source: this.renderedCanvas}]).then(() => {
+    this.vrDisplay.requestPresent([{ source: this.renderedCanvas }]).then(() => {
       if (!this.vrDisplay.cardboardUI_ || !videojs.browser.IS_IOS) {
         return;
       }
@@ -317,7 +375,6 @@ class VR extends Plugin {
       this.iosRevertTouchToClick_();
     }
     this.vrDisplay.exitPresent();
-
   }
 
   requestAnimationFrame(fn) {
@@ -393,9 +450,8 @@ class VR extends Plugin {
   }
 
   setProjection(projection) {
-
     if (!utils.getInternalProjectionName(projection)) {
-      videojs.log.error('videojs-vr: please pass a valid projection ' + utils.validProjections.join(', '));
+      videojs.log.error(`videojs-vr: please pass a valid projection ${ utils.validProjections.join(', ')}`);
       return;
     }
 
@@ -438,9 +494,7 @@ class VR extends Plugin {
     this.player_.bigPlayButton = this.player_.getChild('BigVrPlayButton');
 
     // mobile devices, or cardboard forced to on
-    if (this.options_.forceCardboard ||
-        videojs.browser.IS_ANDROID ||
-        videojs.browser.IS_IOS) {
+    if (this.options_.forceCardboard || videojs.browser.IS_ANDROID || videojs.browser.IS_IOS) {
       this.addCardboardButton_();
     }
 
@@ -467,7 +521,7 @@ class VR extends Plugin {
       } catch (e) {
         this.reset();
         this.player_.pause();
-        this.triggerError_({code: 'web-vr-hls-cors-not-supported', dismiss: false});
+        this.triggerError_({ code: 'web-vr-hls-cors-not-supported', dismiss: false });
         throw new Error(e);
       }
     };
@@ -525,9 +579,9 @@ class VR extends Plugin {
         this.animationFrameId_ = this.requestAnimationFrame(this.animate_);
       });
     } else if (window.navigator.getVRDevices) {
-      this.triggerError_({code: 'web-vr-out-of-date', dismiss: false});
+      this.triggerError_({ code: 'web-vr-out-of-date', dismiss: false });
     } else {
-      this.triggerError_({code: 'web-vr-not-supported', dismiss: false});
+      this.triggerError_({ code: 'web-vr-not-supported', dismiss: false });
     }
 
     this.on(this.player_, 'fullscreenchange', this.handleResize_);
