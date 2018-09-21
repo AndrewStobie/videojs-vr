@@ -264,17 +264,17 @@ class VR extends Plugin {
       this.movieGeometry.faceVertexUvs[0][2] = [left[2], left[1], left[3]];
       this.movieGeometry.faceVertexUvs[0][3] = [left[1], left[0], left[3]];
 
-      this.movieGeometry.faceVertexUvs[0][4] = [top[2], top[1], top[3]];
-      this.movieGeometry.faceVertexUvs[0][5] = [top[1], top[0], top[3]];
+      this.movieGeometry.faceVertexUvs[0][4] = [top[3], top[2], top[0]];
+      this.movieGeometry.faceVertexUvs[0][5] = [top[2], top[1], top[0]];
 
-      this.movieGeometry.faceVertexUvs[0][6] = [bottom[2], bottom[1], bottom[3]];
-      this.movieGeometry.faceVertexUvs[0][7] = [bottom[1], bottom[0], bottom[3]];
+      this.movieGeometry.faceVertexUvs[0][6] = [bottom[3], bottom[2], bottom[0]];
+      this.movieGeometry.faceVertexUvs[0][7] = [bottom[2], bottom[1], bottom[0]];
 
       this.movieGeometry.faceVertexUvs[0][8] = [front[2], front[1], front[3]];
       this.movieGeometry.faceVertexUvs[0][9] = [front[1], front[0], front[3]];
 
-      this.movieGeometry.faceVertexUvs[0][10] = [back[2], back[1], back[3]];
-      this.movieGeometry.faceVertexUvs[0][11] = [back[1], back[0], back[3]];
+      this.movieGeometry.faceVertexUvs[0][10] = [back[3], back[2], back[0]];
+      this.movieGeometry.faceVertexUvs[0][11] = [back[2], back[1], back[0]];
 
       this.movieScreen = new THREE.Mesh(this.movieGeometry, this.movieMaterial);
       this.movieScreen.position.set(position.x, position.y, position.z);
